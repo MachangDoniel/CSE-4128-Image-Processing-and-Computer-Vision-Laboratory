@@ -12,7 +12,6 @@ def generatePDF(image):
     h,w= image.shape
     print("Size of the image: ",w,h)
 
-    output=np.zeros((w+1,h+1))
     pdf=np.zeros(256)
 
     for i in range(h):
@@ -27,17 +26,21 @@ def generatePDF(image):
 def round(n):
     base=int(n)
     if(n>base+.5):
-        return min(255,base+1)
+        return base+1
     else:
         return base
 
 def generateCDF(pdf):
     cdf=pdf.copy()
     cdf*=255
+    cdf[0]=round(cdf[0])
     for i in range(1,len(cdf)):
         cdf[i]+=cdf[i-1]
         cdf[i]=round(cdf[i])
 
+    # Normalize the CDF to ensure the sum equals 255
+    cdf = np.round(cdf / cdf[-1] * 255).astype(np.uint8)
+    
     print(cdf)
     return cdf
 
