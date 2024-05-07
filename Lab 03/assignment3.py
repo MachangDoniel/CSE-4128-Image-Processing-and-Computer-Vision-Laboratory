@@ -89,7 +89,7 @@ def start():
 
     input_image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-    target_histogram = double_gaussian_histogram(30, 8, 165, 20, 1, 1)
+    target_histogram = double_gaussian_histogram(60, 10, 160, 15, 1, 1)
 
     histo("Target Histogram",target_histogram)
 
