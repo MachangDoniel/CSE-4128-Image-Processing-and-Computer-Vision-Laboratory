@@ -13,7 +13,7 @@ def generateGaussianKernel(sigmaX, sigmaY, MUL = 5):
     w = int(sigmaX * MUL) | 1
     h = int(sigmaY * MUL) | 1
     
-    print("Size of the kernel: ",h,"*",w)
+    print("n of the kernel: ",h,"*",w)
 
     cx = w // 2  # 2
     cy = h // 2  # 2
@@ -52,16 +52,35 @@ def generateMeanKernel(rows = 3, cols = 3):#odd
     print(formatted_kernel)
     return (kernel)
 
-def generateLaplacianKernel(negCenter = True, n=3):   
-    other_values= 1 if negCenter else -1
+# def generateLaplacianKernel(negCenter = True, n=3):   
+#     other_values= 1 if negCenter else -1
     
-    kernel= other_values* np.ones((n,n))
-    center= n//2
-    kernel[center, center]= -other_values*(n*n-1)
+#     kernel= other_values* np.ones((n,n))
+#     center= n//2
+#     kernel[center, center]= -other_values*(n*n-1)
     
-    print("Lapcican filter")
+#     print("Lapcican filter")
+#     print(kernel)
+#     return (kernel)
+
+def generateLaplacianKernel(negCenter = True, n = 3):
+    n = n | 1             # n must be odd
+    kernel = np.zeros((n,n))
+    center = n * n -1
+    if negCenter:
+        for i in range(n):
+            for j in range(n):
+                kernel[i][j] = 1
+        kernel[n // 2][n // 2] = - center
+    else:
+        for i in range(n):
+            for j in range(n):
+                kernel[i][j] = -1
+        kernel[n // 2][n // 2] = center
+
+    print("Lapcian Kernel")
     print(kernel)
-    return (kernel)
+    return kernel
 
 def generateLogKernel(sigma, MUL = 7): 
     n = int(sigma * MUL)
@@ -116,6 +135,7 @@ def testKernel():
     kernel = generateLaplacianKernel(negCenter = True, n=3)
     
     kernel = generateLogKernel(1.4)
+    print(kernel)
     
     kernel = generateSobelKernel( horiz = True )
     

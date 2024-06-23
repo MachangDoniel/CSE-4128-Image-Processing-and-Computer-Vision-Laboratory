@@ -5,26 +5,27 @@ import numpy as np
 from PIL import Image, ImageTk
 import os
 
-# Function to segment the input image to isolate the alphabet characters
+# Segmentation on input image to isolate the alphabets
 def segment_image(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Sorting contours wrt their x-coordinate
+    contours = sorted(contours, key=lambda c: cv2.boundingRect(c)[0])
+
     segments = []
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         segments.append(image[y:y+h, x:x+w])
     return segments
 
-# Function to preprocess each character segment
 def preprocess_image(segment):
-    # Resize segment to 100x100
     resized = cv2.resize(segment, (100, 100))
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     return gray
 
-# Function to preprocess and threshold template images
 def preprocess_templates(template_dir):
     preprocessed_templates = {}
     for alphabet_file in os.listdir(template_dir):
@@ -37,22 +38,20 @@ def preprocess_templates(template_dir):
                 preprocessed_templates[alphabet_file] = template_preprocessed
     return preprocessed_templates
 
-# Function to compare images based on dark pixel matching
 def compare_images(input_processed, template):
     # Find dark pixels (intensity 127 or less)
-    dark_pixels_input = input_processed <= 30
-    dark_pixels_template = template <= 30
+    dark = 10
+    dark_pixels_input = input_processed <= dark
+    dark_pixels_template = template <= dark
 
     # cv2.imshow("Input Image",input_processed)
     # cv2.imshow("Template",template)
     # cv2.waitKey(0)
 
-    # Count matching dark pixels
     matching_dark_pixels = np.sum(dark_pixels_input & dark_pixels_template)
     
     return matching_dark_pixels
 
-# Function to recognize multiple alphabets from the input image
 def recognize_alphabets(input_image, preprocessed_templates):
     segments = segment_image(input_image)
     recognized_alphabets = []
@@ -81,24 +80,23 @@ def recognize_alphabets(input_image, preprocessed_templates):
 
     return recognized_alphabets
 
-# Function to open a file dialog and get the path to the selected image
 def select_image():
     file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
     if file_path:
         input_image_path.set(file_path)
         load_image(file_path)
 
-# Function to load and display the selected image
 def load_image(image_path):
     image = cv2.imread(image_path)
-    # Resize image to 100x100
-    image = cv2.resize(image, (100, 100))
+    aspect_ratio = image.shape[1] / image.shape[0]
+    max_height = 200
+    target_width = int(max_height * aspect_ratio)
+    image = cv2.resize(image, (target_width, max_height))
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     photo = ImageTk.PhotoImage(image=Image.fromarray(image_rgb))
     image_label.config(image=photo)
     image_label.image = photo
 
-# Function to perform alphabet detection
 def detect_alphabet():
     input_path = input_image_path.get()
     if input_path:
