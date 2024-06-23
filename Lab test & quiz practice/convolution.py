@@ -208,8 +208,8 @@ def convolutionRGB(input, kernel):
 def convolutionHSV(input, kernel):
     center = getKernelCenter(kernel)
     hue, saturation, value = cv2.split(input)
-    hue = convolution(hue, kernel, center)
-    saturation = convolution(saturation, kernel, center)
+    # hue = convolution(hue, kernel, center)
+    # saturation = convolution(saturation, kernel, center)
     value = convolution(value, kernel, center)
     merged = cv2.merge((hue, saturation, value))
     cv2.imshow('Hue', hue)
